@@ -1,0 +1,4 @@
+platform
+========
+
+Minimalist bloging platform
