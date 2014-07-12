@@ -1,0 +1,1 @@
+<h1><a href="?post=@id">POST @id</a></h1>
