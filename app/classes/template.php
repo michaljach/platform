@@ -9,8 +9,9 @@ class Template {
     protected $file;
     protected $values = array();
   
-    public function __construct($file, $values){
-        $this->file = "templates/".App::$settings['0']['value']."/".$file;
+    public function __construct($file, $values = NULL, $app = false){
+        $dir = $app ? "app/templates/" . $file : "templates/".App::$settings['0']['value']."/".$file;
+        $this->file = $dir;
         $this->values = $values;
         echo $this->output();
     }
@@ -20,12 +21,12 @@ class Template {
             return "Error loading template file ($this->file).";
         }
         $output = file_get_contents($this->file);
-      
-        foreach ($this->values as $key => $value) {
-            $tagToReplace = "@$key";
-            $output = str_replace($tagToReplace, $value, $output);
+        if($this->values != NULL){
+            foreach ($this->values as $key => $value) {
+                $tagToReplace = "@$key";
+                $output = str_replace($tagToReplace, $value, $output);
+            }
         }
-      
         return $output;
     }
 }
