@@ -57,8 +57,8 @@ class App {
         session_regenerate_id();
     }
 
-    public function login($email, $password, $mysqli){
-        if ($stmt = $mysqli->prepare("SELECT id, username, password, salt FROM members WHERE email = ? LIMIT 1")) {
+    public function login($email, $password){
+        if ($stmt = Database::$db->prepare("SELECT id, username, password, salt FROM members WHERE email = ? LIMIT 1")) {
             $stmt->bind_param('s', $email);
             $stmt->execute();
             $stmt->store_result();
@@ -124,7 +124,7 @@ class App {
                     $email = $_POST["email"];
                     $password = $_POST["password"];
                  
-                    if (login($email, $password, $mysqli) == true) {
+                    if ($this->login($email, $password) == true) {
                         header('Location: ../protected_page.php');
                     } else {
                         header('Location: ../index.php?error=1');
