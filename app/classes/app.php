@@ -26,7 +26,8 @@ class App {
 
     // Get settings data
     public function getSettings(){
-        $q = Database::query("SELECT * FROM settings");
+        $q = Database::$db->prepare("SELECT * FROM settings");
+        $q->execute();
         self::$settings = $q->fetchAll();
         require_once("languages/".App::$settings['2']['value'].".php");
     }
@@ -36,41 +37,19 @@ class App {
         return isset($_GET[$param]) ? htmlspecialchars(trim($_GET[$param])) : NULL;
     }
 
-    // Secure session
-    public function sessionStart(){
-        $session_name = "sec_session_id";
-        $secure = "SECURE";
-        $httponly = true;
-        if (ini_set("session.use_only_cookies", 1) === FALSE) {
-            header("Location: ../error.php?err=Could not initiate a safe session (ini_set)");
-            exit();
-        }
-        $cookieParams = session_get_cookie_params();
-        session_set_cookie_params($cookieParams["lifetime"],
-            $cookieParams["path"], 
-            $cookieParams["domain"], 
-            $secure,
-            $httponly);
-
-        session_name($session_name);
-        session_start();
-        session_regenerate_id();
-    }
-
-    public function login($email, $password){
-        if ($stmt = Database::$db->prepare("SELECT id, username, password, salt FROM members WHERE email = ? LIMIT 1")) {
-            $stmt->bind_param('s', $email);
+    // Login method
+    public function login($login, $password){
+        if ($stmt = Database::$db->prepare("SELECT * FROM users WHERE login = ? LIMIT 1")) {
+            $stmt->bindValue(1, $login, PDO::PARAM_STR);
             $stmt->execute();
-            $stmt->store_result();
-            $stmt->bind_result($user_id, $username, $db_password, $salt);
-            $stmt->fetch();
-            $password = hash('sha512', $password . $salt);
-            if ($stmt->num_rows == 1) {
-                if ($db_password == $password) {
+            $result = $stmt->fetch();
+            $password = hash('sha512', $password);
+            if ($stmt->rowCount() == 1) {
+                if ($result['password'] == $password) {
                     $user_browser = $_SERVER['HTTP_USER_AGENT'];
-                    $user_id = preg_replace("/[^0-9]+/", "", $user_id);
+                    $user_id = preg_replace("/[^0-9]+/", "", $result['id']);
                     $_SESSION['user_id'] = $user_id;
-                    $username = preg_replace("/[^a-zA-Z0-9_\-]+/","", $username);
+                    $username = preg_replace("/[^a-zA-Z0-9_\-]+/","", $result['login']);
                     $_SESSION['username'] = $username;
                     $_SESSION['login_string'] = hash('sha512', $password . $user_browser);
                     return true;
@@ -81,6 +60,16 @@ class App {
         }
     }
 
+    // Logout method
+    public function logout(){
+        $_SESSION = array();
+        $params = session_get_cookie_params();
+        setcookie(session_name(),'', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]); 
+        session_destroy();
+        $tpl = new Template("admin_login.tpl", NULL, true);
+    }
+
+    // Login check with session
     public function checkLogin(){
         if (isset($_SESSION['user_id'], $_SESSION['username'], $_SESSION['login_string'])){
             $user_id = $_SESSION["user_id"];
@@ -89,16 +78,12 @@ class App {
      
             $user_browser = $_SERVER["HTTP_USER_AGENT"];
      
-            if ($stmt = $mysqli->prepare("SELECT password FROM members WHERE id = ? LIMIT 1")){
-                $stmt->bind_param('i', $user_id);
+            if ($stmt = Database::$db->prepare("SELECT password FROM users WHERE id = ? LIMIT 1")){
+                $stmt->bindValue(1, $user_id, PDO::PARAM_INT);
                 $stmt->execute();
-                $stmt->store_result();
-     
-                if ($stmt->num_rows == 1) {
-                    $stmt->bind_result($password);
-                    $stmt->fetch();
-                    $login_check = hash('sha512', $password . $user_browser);
-     
+                $result = $stmt->fetch();
+                if ($stmt->rowCount() == 1) {
+                    $login_check = hash('sha512', $result['password'] . $user_browser);
                     if ($login_check == $login_string) {
                         return true;
                     } else {
@@ -117,25 +102,27 @@ class App {
 
     // Renders current page
     public function renderApp(){
+        session_start();
         if($this->getParam("id") != NULL){
-            if($this->getParam("id") == "login"){
-                $this->sessionStart();
-                if (isset($_POST["email"], $_POST["password"])) {
-                    $email = $_POST["email"];
+            if($this->getParam("id") == "admin"){
+                if (isset($_POST["login"], $_POST["password"])) {
+                    $login = $_POST["login"];
                     $password = $_POST["password"];
                  
-                    if ($this->login($email, $password) == true) {
-                        header('Location: ../protected_page.php');
+                    if ($this->login($login, $password) == true) {
+                        $tpl = new Template("admin_index.tpl", NULL, true);
                     } else {
-                        header('Location: ../index.php?error=1');
+                        $tpl = new Template("admin_login.tpl", NULL, true);
                     }
                 } else {
                     if ($this->checkLogin() == true){
-
+                        $tpl = new Template("admin_index.tpl", NULL, true);
                     } else {
                         $tpl = new Template("admin_login.tpl", NULL, true);
                     }
                 }
+            } else if($this->getParam("id") == "logout"){
+                $this->logout();
             } else {
                 $tpl = new Template("header.tpl", array());
                 $post = Post::getPost(intval($this->getParam("id")));

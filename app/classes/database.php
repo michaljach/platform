@@ -18,13 +18,14 @@ class Database {
         }
     }
     //Database query execute
-    public static function query($query){
-        try {
-            $result = self::$db->query($query);
-        } catch(PDOException $e) {
-            echo $e->getMessage();
-        }
-        return $result;
-    }
+    // public static function query($query){
+    //     try {
+    //         $result = self::$db->prepare($query);
+    //         $result->execute();
+    //     } catch(PDOException $e) {
+    //         echo $e->getMessage();
+    //     }
+    //     return $result;
+    // }
 }
 ?>
