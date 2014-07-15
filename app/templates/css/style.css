@@ -6,6 +6,11 @@ body {
     width: 200px;
     margin: 10% auto;
 }
+.wrapper-login h2 {
+    color: #ccc;
+    font-family: 'Lato', sans-serif;
+    letter-spacing: 1px;
+}
 .input {
     font-family: 'Lato', sans-serif;
     background: #fff;
@@ -16,9 +21,9 @@ body {
     border: 0;
     outline: none;
     display: block;
-    -webkit-box-shadow: 1px 0 0 0 #dfdfdf;
-    -moz-box-shadow: 1px 0 0 0 #dfdfdf;
-    box-shadow: 1px 0 0 0 #dfdfdf;
+    -webkit-box-shadow: 1px 0 0 0 #ccc;
+    -moz-box-shadow: 1px 0 0 0 #ccc;
+    box-shadow: 1px 0 0 0 #ccc;
     color: #959595;
     -webkit-transition: border 0.3s;
     -moz-transition: border 0.3s;
@@ -26,10 +31,18 @@ body {
     -webkit-transform-style: preserve-3d;
     -moz-transform-style: preserve-3d;
     transform-style: preserve-3d;
-    border-bottom: 2px solid #dfdfdf;
+    border-bottom: 2px solid #ccc;
 }
 .input:focus {
     border-bottom: 2px solid #5cbcf6;
+}
+.perspective {
+    -webkit-perspective: 800px;
+    -moz-perspective: 800px;
+    perspective: 800px;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
 }
 .button {
     border: 0;
@@ -49,20 +62,41 @@ body {
     transition: all 0.3s;
     letter-spacing: 1px;
 }
-.perspective {
-    -webkit-perspective: 800px;
-    -moz-perspective: 800px;
-    perspective: 800px;
-    display: inline-block;
-    margin: 0;
-    padding: 0;
-}
 .button:after {
+    opacity: 0;
+    right: 15%;
+    position: absolute;
+    content: '→';
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+}
+.button:hover {
+    background: #1fa2f1;
+}
+.button:hover:after {
+    opacity: 1;
+    right: 10%;
+    position: absolute;
+}
+.button:active {
+    color: #dfdfdf;
+    -webkit-transition: all 0s;
+    -moz-transition: all 0s;
+    transition: all 0s;
+}
+.button:before {
+    text-transform: uppercase;
     width: 100%;
-    height: 40%;
+    height: 100%;
+    position: absolute;
     left: 0;
+    line-height: 50px;
     top: 100%;
-    background: #49a7df;
+    background: #e96a6a;
+    color: #a33a3a;
+    content: 'Error!';
+    font-weight: 700;
     -webkit-transform-origin: 0% 0%;
     -webkit-transform: rotateX(-90deg);
     -moz-transform-origin: 0% 0%;
@@ -71,28 +105,21 @@ body {
     -ms-transform: rotateX(-90deg);
     transform-origin: 0% 0%;
     transform: rotateX(-90deg);
-    content: '';
-    position: absolute;
-    z-index: -1;
-    -webkit-transition: all 0.3s;
-    -moz-transition: all 0.3s;
-    transition: all 0.3s;
 }
-.button:hover {
-    -webkit-transform: rotateX(25deg);
-    -moz-transform: rotateX(25deg);
-    -ms-transform: rotateX(25deg);
-    transform: rotateX(25deg);
+.button-error {
+    background: #aaa;
+    -webkit-transform-origin: 50% 0%;
+    -webkit-transform: rotateX(90deg) translateY(-100%);
+    -moz-transform-origin: 50% 0%;
+    -moz-transform: rotateX(90deg) translateY(-100%);
+    -ms-transform-origin: 50% 0%;
+    -ms-transform: rotateX(90deg) translateY(-100%);
+    transform-origin: 50% 0%;
+    transform: rotateX(90deg) translateY(-100%);
 }
-.button:active {
-    margin-top: 5px;
-    -webkit-transition: all 0s;
-    -moz-transition: all 0s;
-    transition: all 0s;
-}
-.button:active:after {
-    height: 20%;
-    -webkit-transition: all 0s;
-    -moz-transition: all 0s;
-    transition: all 0s;
+.error {
+    font-family: 'Lato', sans-serif;
+    padding: 20px;
+    background: #e96a6a;
+    color: #fff;
 }

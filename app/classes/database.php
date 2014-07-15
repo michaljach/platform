@@ -14,7 +14,8 @@ class Database {
             self::$db = new PDO("mysql:host=".DBHOST.";port=8889;dbname=".DBNAME, DBUSER, DBPASS);
             self::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch(PDOException $e){
-            echo $e->getMessage();
+            Error::showError($e->getMessage());
+            die();
         }
     }
     //Database query execute

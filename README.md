@@ -1,4 +1,4 @@
-platform
+§ection
 ========
 
-Minimalist bloging platform
+Minimalist blogging platform.

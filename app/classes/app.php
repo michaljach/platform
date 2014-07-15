@@ -66,11 +66,11 @@ class App {
         $params = session_get_cookie_params();
         setcookie(session_name(),'', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]); 
         session_destroy();
-        $tpl = new Template("admin_login.tpl", NULL, true);
+        header('location: ?id=admin');
     }
 
     // Login check with session
-    public function checkLogin(){
+    public function checkSession(){
         if (isset($_SESSION['user_id'], $_SESSION['username'], $_SESSION['login_string'])){
             $user_id = $_SESSION["user_id"];
             $login_string = $_SESSION["login_string"];
@@ -100,45 +100,59 @@ class App {
         }
     }
 
+    // Admin login
+    public function checkLogin(){
+        $login = $_POST["login"];
+        $password = $_POST["password"];
+        
+        if ($this->login($login, $password) == true) {
+            $result = true;
+        } else {
+            $result = "Wrong login!";
+        }
+        
+        echo json_encode($result);
+    }
+
+    // Admin page render
+    public function renderAdmin(){
+        $tpl = new Template("admin_index.tpl", NULL, true);
+    }
+
     // Renders current page
     public function renderApp(){
         session_start();
         if($this->getParam("id") != NULL){
             if($this->getParam("id") == "admin"){
                 if (isset($_POST["login"], $_POST["password"])) {
-                    $login = $_POST["login"];
-                    $password = $_POST["password"];
-                 
-                    if ($this->login($login, $password) == true) {
-                        $tpl = new Template("admin_index.tpl", NULL, true);
-                    } else {
-                        $tpl = new Template("admin_login.tpl", NULL, true);
-                    }
+                    $this->checkLogin();
                 } else {
-                    if ($this->checkLogin() == true){
-                        $tpl = new Template("admin_index.tpl", NULL, true);
+                    $tpl = new Template("admin_header.tpl", NULL, true);
+                    if ($this->checkSession() == true){
+                        $this->renderAdmin();
                     } else {
                         $tpl = new Template("admin_login.tpl", NULL, true);
                     }
+                    $tpl = new Template("admin_footer.tpl", NULL, true);
                 }
             } else if($this->getParam("id") == "logout"){
                 $this->logout();
             } else {
-                $tpl = new Template("header.tpl", array());
+                $tpl = new Template("header.tpl");
                 $post = Post::getPost(intval($this->getParam("id")));
                 if(!$post){
                     Error::showError(NO_POST);
                 } else {
                     $tpl = new Template("post.tpl", array("id"=>$post['id']));
                 }
-                $tpl = new Template("footer.tpl", array());
+                $tpl = new Template("footer.tpl");
             }
         } else {
-            $tpl = new Template("header.tpl", array());
+            $tpl = new Template("header.tpl");
             foreach (Post::getPosts() as $post) {
                 $tpl = new Template("post.tpl", array("id"=>$post['id']));
             }
-            $tpl = new Template("footer.tpl", array());
+            $tpl = new Template("footer.tpl");
         }
     }
 }
