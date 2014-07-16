@@ -79,12 +79,6 @@ body {
     right: 10%;
     position: absolute;
 }
-.button:active {
-    color: #dfdfdf;
-    -webkit-transition: all 0s;
-    -moz-transition: all 0s;
-    transition: all 0s;
-}
 .button:before {
     text-transform: uppercase;
     width: 100%;
